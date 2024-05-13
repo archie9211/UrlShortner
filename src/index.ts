@@ -53,22 +53,45 @@ function ensureProtocol(urlString: string): string {
     }
 }
   // Handle requests to delete a URL
-	async function deleteUrl(request: Request, env: Env): Promise<Response> {
-		const { pathname } = new URL(request.url);
-		const slug = pathname.split('/').pop(); // Extract the slug from the URL
-		const url = await env.myUrlShortner_KV.get(slug);
-		await env.myUrlShortner_KV.delete(slug);
-		// For simplicity, also delete the reverse mapping
-		if (url) {
-			await env.myUrlShortner_KV.delete(url);
-		}
-		return new Response('URL deleted successfully', { status: 200 });
-	}
+  async function deleteUrl(request: Request, env: Env): Promise<Response> {
+    // Extract username and password from the request
+    const username = request.headers.get('X-Username');
+    const password = request.headers.get('X-Password');
+
+    // Check if username and password are provided
+    if (!username || !password) {
+        // If username or password is missing, return unauthorized response
+		return new Response('Unauthorized: Username or password missing', { status: 401 });
+    }
+
+    // Fetch the stored password associated with the provided username
+    const storedPassword = await env.myUrlShortner_KV.get(username);
+
+    // Check if stored password exists and matches the provided password
+    if (storedPassword && password === storedPassword) {
+        // If password matches, proceed with deleting the URL
+        const { pathname } = new URL(request.url);
+        const slug = pathname.split('/').pop(); // Extract the slug from the URL
+        const url = await env.myUrlShortner_KV.get(slug);
+        await env.myUrlShortner_KV.delete(slug);
+
+        // For simplicity, also delete the reverse mapping
+        if (url) {
+            await env.myUrlShortner_KV.delete(url);
+        }
+
+        return new Response('URL deleted successfully', { status: 200 });
+    } else {
+        // If password does not match, return unauthorized response
+        return new Response('Unauthorized: Invalid username or password', { status: 401 });
+    }
+}
+
 	// Handle requests to list all URLs
 	async function listUrls(request: Request, env: Env): Promise<Response> {
 		const keys = await env.myUrlShortner_KV.list();
 		const urls = await Promise.all(keys.keys.map(async (key: { name: string }) => {
-			if (!key.name.startsWith('_') && !key.name.startsWith('http')) {
+			if (!key.name.startsWith('_') && !key.name.startsWith('http') && !key.name.startsWith('admin') ) {
 				const slug = key.name;
 				const shortUrl = new URL(slug, request.url).toString();
 				const targetUrl = await env.myUrlShortner_KV.get(slug);
@@ -136,11 +159,34 @@ function ensureProtocol(urlString: string): string {
 		  <script>
 			// Function to delete a URL
 			async function deleteUrl(slug) {
-				const response = await fetch('/delete/' + slug, { method: 'DELETE' });
+				const storedUsername = localStorage.getItem('username');
+    			const storedPassword = localStorage.getItem('password');
+				const headers = new Headers();
+				if (storedUsername && storedPassword) {
+					headers.append('X-Username', storedUsername);
+					headers.append('X-Password', storedPassword);
+				}
+				else{
+					const username = prompt('Enter your username:');
+					const password = prompt('Enter your password:');
+					localStorage.setItem('username', username);
+
+					localStorage.setItem('password', password);
+
+					// Construct the headers with username and password
+					headers.append('Content-Type', 'application/json');
+					headers.append('X-Username', username);
+					headers.append('X-Password', password);
+				}
+				
+				const response = await fetch('/delete/' + slug, { method: 'DELETE',headers: headers});
 				if (response.ok) {
 					// Reload the list page after a short delay
 					window.location.href = '/list';
 				} else {
+					localStorage.removeItem('username');
+
+					localStorage.removeItem('password');
 					alert('Failed to delete URL');
 				}
 			}
