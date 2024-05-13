@@ -1,3 +1,60 @@
+
+const header = `
+<style>
+  header {
+    background-color: #d0b2b2;
+    color: black;
+    padding: 10px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  header nav a {
+    color: black;
+    text-decoration: none;
+    margin-right: 20px;
+    font-weight: bold;
+  }
+
+  header nav a:hover {
+    color: blue;
+  }
+
+ 
+</style>
+
+<header>
+  <div>
+    <a href="/">
+      <h1>URL Shortener</h1>
+    </a>
+  </div>
+  <nav>
+    <a href="/">Home</a>
+    <a href="/list">List URLs</a>
+    <a target="_blank" href="https://github.com/archie9211/UrlShortner">Github</a>
+  </nav>
+</header>
+`;
+
+const footer = `
+
+<style>
+footer {
+    background-color: #d0b2b2;
+    color: black;
+    padding: 10px;
+    text-align: center;
+    font-size: 14px;
+  }
+</style>
+<footer>
+  <p>&copy; 2023 URL Shortener. All rights reserved.</p>
+</footer>
+
+`;
+
 export const rootHtml = `
   <html lang="en">
   <head>
@@ -8,9 +65,18 @@ export const rootHtml = `
 		body {
 		  font-family: Arial, sans-serif;
 		  background-color: #f4f4f4;
-		  margin: 0;
 		  padding: 0;
 		}
+        body {
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            margin: 0;
+          }
+          
+          main {
+            flex-grow: 1;
+          }
 	
 		h1 {
 		  text-align: center;
@@ -70,18 +136,22 @@ export const rootHtml = `
 	  </style>
   </head>
   <body>
+        ${header}
+    <main>
     <h1>URL Shortener</h1>
     <form id="form">
-      <label for="url">Enter URL:</label>
+      <label for="url">Paste the URL to be shortened:</label>
       <input type="text" id="url" name="url" required>
       <button type="submit">Shorten</button>
     </form>
     <p id="shortened-url"></p>
     <p id="error-message"></p>
+
     <script>
     const form = document.getElementById('form');
 const shortenedUrlElement = document.getElementById('shortened-url');
 const errorMessageElement = document.getElementById('error-message');
+
 
 form.addEventListener('submit', async (event) => {
   event.preventDefault();
@@ -105,6 +175,8 @@ form.addEventListener('submit', async (event) => {
   }
 });
     </script>
+</main>
+    ${footer}
   </body>
   </html>
 `;
@@ -119,9 +191,16 @@ export const listHtml = (urlList: string) => `
     body {
         font-family: Arial, sans-serif;
         background-color: #f4f4f4;
-        margin: 0;
         padding: 0;
+        display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            margin: 0;
     }
+    main {
+        flex-grow: 1;
+      }
+
     h1 {
         text-align: center;
         color: #333;
@@ -160,6 +239,8 @@ export const listHtml = (urlList: string) => `
   </style>
   </head>
   <body>
+  ${header}
+  <main>
     <h1>URL Shortener - List URLs</h1>
     <ul>
       ${urlList}
@@ -199,6 +280,12 @@ export const listHtml = (urlList: string) => `
 				}
 			}
     </script>
+    </main>
+
+    ${footer}
+
   </body>
   </html>
 `;
+
+
