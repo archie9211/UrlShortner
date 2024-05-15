@@ -25,6 +25,11 @@ export async function handleRootRequest(request, env): Promise<Response> {
 }
 
 export async function listUrls(request, env): Promise<Response> {
+  const truncateUrl = (url, maxLength = 35) => {
+    if (url.length <= maxLength) return url;
+    return url.slice(0, maxLength) + '...';
+  };
+
   const keys = await env.myUrlShortner_KV.list();
   const urls = await Promise.all(keys.keys.map(async (key) => {
     if (!key.name.startsWith("_") && !key.name.startsWith("http") && !key.name.startsWith("admin")) {
@@ -32,9 +37,10 @@ export async function listUrls(request, env): Promise<Response> {
       const shortUrl = new URL(slug, request.url).toString();
       const targetUrl = await env.myUrlShortner_KV.get(slug);
       if (targetUrl) {
+        const truncatedTargetUrl = truncateUrl(targetUrl);
         return `<li class="list-group-item">
                   <strong>Short URL:</strong> <a href="${shortUrl}" target="_blank">${shortUrl}</a><br>
-                  <strong>Target URL:</strong> <a href="${targetUrl}" target="_blank">${targetUrl}</a>
+                  <strong>Target URL:</strong> <a href="${targetUrl}" target="_blank">${truncatedTargetUrl}</a>
                   <button class="btn btn-danger btn-sm float-right" onclick="deleteUrl('${slug}')">Delete</button>
                 </li>`;
       }
