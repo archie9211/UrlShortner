@@ -1,4 +1,4 @@
-import { ensureProtocol, generateShortUrl, isValidUrl } from './utils';
+import { generateShortUrl, isValidUrl } from './utils';
 import { rootHtml, listHtml } from './html';
 
 export async function handleRootRequest(request: Request, env: Env): Promise<Response> {
@@ -8,15 +8,15 @@ export async function handleRootRequest(request: Request, env: Env): Promise<Res
 		if (!isValidUrl(url)) {
 			return new Response('Invalid URL', { status: 400 });
 		}
-		const normalizedUrl = ensureProtocol(url);
-		const existingSlug = await env.myUrlShortner_KV.get(normalizedUrl);
+		// const normalizedUrl = ensureProtocol(url);
+		const existingSlug = await env.myUrlShortner_KV.get(url);
 		if (existingSlug) {
 			const shortUrl2 = new URL(existingSlug, request.url).toString();
 			return new Response(shortUrl2);
 		}
 		const slug = generateShortUrl();
-		await env.myUrlShortner_KV.put(slug, normalizedUrl);
-		await env.myUrlShortner_KV.put(normalizedUrl, slug);
+		await env.myUrlShortner_KV.put(slug, url);
+		await env.myUrlShortner_KV.put(url, slug);
 		const shortUrl = new URL(slug, request.url).toString();
 		return new Response(shortUrl);
 	}
