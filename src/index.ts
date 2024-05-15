@@ -2,7 +2,7 @@ import { handleRootRequest, listUrls, deleteUrl } from './handlers';
 import { ensureProtocol } from './utils';
 
 export default {
-  async fetch(request, env, ctx) {
+  async fetch(request:Request, env:Env, ctx) {
     const { pathname } = new URL(request.url);
     if (pathname === "/") {
       return handleRootRequest(request, env);
@@ -21,7 +21,3 @@ export default {
   }
 };
 
-// Define the KV namespace binding
-interface Env {
-  myUrlShortner_KV: KVNamespace
-}

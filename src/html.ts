@@ -114,7 +114,7 @@ const rootHtml = `
 
 
 
-const listHtml = (urlList) => `
+const listHtml = (urlList:string) => `
 <!DOCTYPE html>
 <html lang="en">
 <head>
