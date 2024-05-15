@@ -1,6 +1,4 @@
 import { handleRootRequest, listUrls, deleteUrl } from './handlers';
-import { ensureProtocol } from './utils';
-
 export default {
 	async fetch(request: Request, env: Env, ctx: ExecutionContext) {
 		const { pathname } = new URL(request.url);

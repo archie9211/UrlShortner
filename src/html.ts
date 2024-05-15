@@ -112,9 +112,7 @@ const rootHtml = `
 </html>
 `;
 
-
-
-const listHtml = (urlList:string) => `
+const listHtml = (urlList: string) => `
 <!DOCTYPE html>
 <html lang="en">
 <head>
